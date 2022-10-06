@@ -9,7 +9,7 @@ import '../styles/globals.css'
 
 import Fallback from '~/components/features/Fallback';
 
-import { Chakra } from "./chakra";
+import { Chakra } from "../components/chakra";
 import { Session } from 'inspector';
 const colors = {
   brand: {
