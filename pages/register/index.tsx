@@ -28,36 +28,39 @@ const RegisterPage = () => {
         },
     });
     const onSubmit = async ({ email, password, name, confirm }: SignUpData) => {
-        setIsLoading(true);
-        if(password !== confirm) {
-            toast.error('Password does not match his confirm');
-        }
-        else {
-            await apiClient
-            .post(
-                '/api/auth/user',
-                JSON.stringify({ email, password, name })
-            )
-            .then((res) => {
-                if(res.data.user.result === false) {
-                    setIsLoading(false);
-                    toast.error('The email address has taken. Try another.');
-                }
-                else {
-                    setIsLoading(false);
+        try{
+            setIsLoading(true);
+            if(password !== confirm) {
+                toast.error('Password does not match his confirm');
+            }
+            else {
+                await apiClient
+                .post(
+                    '/api/auth/user',
+                    JSON.stringify({ email, password, name })
+                )
+                .then((res) => {
                     router.push('/login');
-                }
-            })
-            .catch((err) => {
-                setIsLoading(false);
-            });
+                })
+                .catch((err) => {
+                    if(err.response.status === 400) {
+                        toast.error('The email address has taken. Try another.');
+                    }
+                });
+            }
+        }
+        catch(err) {
+            console.log('Some error occured during signing up: ', err);
+        }
+        finally {
+            setIsLoading(false);
         }
     };
 
-    return (
+    return (    
         <>
             <Container>
-                <Box mt={'20'} p='10' borderWidth='1px' borderRadius='lg' overflow='hidden' textAlign={'center'}>
+                <Box mt={'20'} mb={'20'} p='10' borderWidth='1px' borderRadius='lg' overflow='hidden' textAlign={'center'}>
                     <form
                         className="flex justify-center flex-col w-full"
                         onSubmit={handleSubmit(onSubmit)}

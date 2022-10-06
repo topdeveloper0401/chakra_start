@@ -1,16 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { getSession, signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { getSession, signIn } from 'next-auth/react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState } from 'recoil';
 import { toast } from 'react-toastify';
-import { Container, FormControl, FormLabel, InputGroup, InputRightElement, Input, Button, Box, Heading, Center } from '@chakra-ui/react'
+import { Container, FormControl, FormLabel, InputGroup, InputRightElement, Input, Button, Box, Heading, Link } from '@chakra-ui/react'
 
-import apiClient from '~/client';
 import { isLoadingState } from '~/store';
 import { SignInData } from '~/types/auth';
 import Fallback from '~/components/features/Fallback';
+import ALink from '~/components/features/ALink';
 
 interface SignInRes {
     error:
@@ -24,7 +25,9 @@ interface SignInRes {
     url: string | null;
 }
 
-const RegisterPage = () => {
+const LoginPage = ({
+    host,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useRecoilState(isLoadingState);
     const [pwdShow, setPwdShow] = useState(false)
@@ -39,16 +42,43 @@ const RegisterPage = () => {
 
     }
     const onSubmit = async ({ email, password }: SignInData) => {
-        setIsLoading(true);
-        const res = (await signIn(
-            'credentials',
-            {
-                email,
-                password,
-                callbackUrl: '/',
-                redirect: false,
+        try{
+            setIsLoading(true);
+            const res = (await signIn(
+                'credentials',
+                {
+                    email,
+                    password,
+                    callbackUrl: '/',
+                    redirect: false,
+                },
+                { host }
+            )) as SignInRes | undefined;
+            if (res) {
+                if (res.error === 'NotVerified') {
+                    router.push('/login/emailsent');
+                }
+                if (res.error === 'UserNotFound') {
+                    setIsLoading(false);
+                    toast.error('User not found');
+                }
+                if (res.error === 'EmailSendError') {
+                    toast.error('Error sending email');
+                }
+    
+                if (res.error === 'WrongPassword') {
+                    setIsLoading(false);
+                    toast.error('Wrong password');
+                }
+                if (res.url) router.push("/blog");
             }
-        )) as SignInRes | undefined;
+        }
+        catch(err) {
+            console.log('Some error occured during signing up: ', err);
+        }
+        finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -83,6 +113,7 @@ const RegisterPage = () => {
                                 </InputRightElement>
                             </InputGroup>
                         </FormControl>
+                        <Link href='/login/pwd-recovery'>Forgot password?</Link>
                         <Box>
                             <Button
                                 mt={4}
@@ -104,6 +135,24 @@ const RegisterPage = () => {
     );
 };
 
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const {
+        req: {
+            headers: { host },
+        },
+    } = context;
 
+    const session = await getSession(context);
+    if (session) {
+        return {
+            redirect: {
+                permanent: false,
+                destination: '/',
+            },
+        };
+    } else {
+        return { props: { host } };
+    }
+};
 
-export default RegisterPage;
+export default LoginPage;

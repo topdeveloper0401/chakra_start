@@ -4,7 +4,7 @@ import {
     localStorageManager,
   } from '@chakra-ui/react'
   
-  export function Chakra({ cookies, children }) {
+  export function Chakra({ cookies, children }:any) {
     // b) Pass `colorModeManager` prop
     const colorModeManager =
       typeof cookies === 'string'
@@ -19,7 +19,7 @@ import {
   }
   
   // also export a reusable function getServerSideProps
-  export function getServerSideProps({ req }) {
+  export function getServerSideProps({ req }:any) {
     return {
       props: {
         // first time users will not have any cookies and you may not return

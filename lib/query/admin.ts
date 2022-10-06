@@ -4,35 +4,59 @@ import { toast } from 'react-toastify';
 
 import { connectToDatabase } from "~/lib/util/mongodb";
 import User from '../models/user';
+import { isNil } from '../util';
 
 
-export const postUser = async (req: NextApiRequest) => {
+
+export const getUser = async ({
+    id,
+    email,
+}: {
+    id?: number;
+    email?: string;
+}) => {
     try {
         await connectToDatabase();
-        let { db } = await connectToDatabase();
-        const collection = db.collection("User");
-        const {name, password, email} = req.body;
-        let result = (await collection.find({email: email}).toArray()).length;
-        if(result > 0) {
-            return ({result:false});
-        }
-        else {
-            const hash = await bcrypt.hash(password, 10);
-            const result = await collection.insertOne({ name:name, email:email, password:hash, kyc_status: false, account_created: new Date().toISOString(), company: false, verified: false, is_active: false});
-            return {result:result};
-            // const user = new User({
-            //     name: req.body.name,
-            //     email: req.body.email,
-            //     password: hash,
-            //     kyc_status: false,
-            //     account_created: new Date().toISOString(),
-            //     company: false,
-            //     verified: false,
-            //     is_active: false
-            // });
-            // await user.save();
-        }
+        const query = {
+            ...(!isNil(id) && { id }),
+            ...(!isNil(email) && { email }),
+        };
+
+        const user = await User.findOne(query);
+        return user;
     } catch (error) {
         throw Error('Database operation failed');
     }
 };
+
+export const postUser = async (req: NextApiRequest) => {
+    try {
+        await connectToDatabase();
+        const hash = await bcrypt.hash(req.body.password, 10);
+        const user = new User({
+            name: req.body.name,
+            password: hash,
+            email: req.body.email,
+            company: false,
+            kyc_status: false,
+            account_created: new Date().toISOString(),
+        });
+        await user.save();
+        return user;
+    } catch (error) {
+        throw Error('Database operation failed');
+    }
+};
+export const updateUser = async ({ _id, ...updatedUser }: any) => {
+    try {
+        const user = await User.findByIdAndUpdate(
+            _id,
+            { $set: { ...updatedUser } },
+            { new: true }
+        );
+        return user;
+    } catch (error) {
+        throw Error('Database operation failed');
+    }
+};
+

@@ -1,15 +1,16 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
 import { NextComponentType, NextPage, NextPageContext } from 'next';
 import { SessionProvider, useSession } from 'next-auth/react';
 import { extendTheme } from '@chakra-ui/react'
+import type { AppProps } from 'next/app'
 import { RecoilRoot } from 'recoil';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles/globals.css'
 
 import Fallback from '~/components/features/Fallback';
 
 import { Chakra } from "./chakra";
+import { Session } from 'inspector';
 const colors = {
   brand: {
     900: '#1a365d',
@@ -27,7 +28,7 @@ type NextComponentWithAuth = NextComponentType<NextPageContext, any, {}> &
     Partial<AuthEnabledComponentConfig>;
 
 
-type AppPropsWithLayout = AppProps & {
+type AppPropsWithLayout = any & AppProps & {
     Component: NextComponentWithAuth;
 };
 
