@@ -12,7 +12,6 @@
     "@chakra-ui/react": "^2.3.4",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
-    "@hapi/boom": "^10.0.0",
     "@sendgrid/mail": "^7.7.0",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
@@ -31,6 +30,7 @@
     "recoil": "^0.7.5"
   },
   "devDependencies": {
+    "@hapi/boom": "^10.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "18.7.23",
