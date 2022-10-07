@@ -26,7 +26,7 @@ export const sendEmail = async ({
         };
         const data = {
             to: "kattymokh@gmail.com",
-            from: "topdeveloper@gmail.com",
+            from: "topdeveloper0908@gmail.com",
             subject: `New message from`,
             text: 'message',
             html: 'message'.replace(/\r\n/g, "<br />"),
